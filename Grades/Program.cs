@@ -13,6 +13,7 @@ namespace Grades
         {
             book = new GradeBook();
             book.Name = "Nowy dziennik";
+            book.Name = "Jeszcze nowszy dziennik";
         }
 
         static void IncrementNumber(ref int number)
