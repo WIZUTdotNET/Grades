@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace Grades
         public GradeBook(string name = "No name")
         {
             Name = name;
-            grades = new List<float>();
+            _grades = new List<float>();
         }
 
         public GradeStatistics ComputeStatistics()
@@ -20,7 +21,7 @@ namespace Grades
             GradeStatistics stats = new GradeStatistics();
             float sum = 0f;
 
-            foreach (float grade in grades)
+            foreach (float grade in _grades)
             {
 
                 stats.HighestGrade = Math.Max(grade, stats.HighestGrade);
@@ -29,7 +30,7 @@ namespace Grades
                 sum = sum + grade; //sum += grade;
             }
 
-            stats.AverageGrade = sum / grades.Count;
+            stats.AverageGrade = sum / _grades.Count;
 
             return stats;
         }
@@ -38,7 +39,16 @@ namespace Grades
         {
             if (grade >= 0 && grade <= 100)
             {
-                grades.Add(grade);
+                _grades.Add(grade);
+            }
+        }
+
+        public void WriteGrades(TextWriter textWriter)
+        {
+            textWriter.WriteLine("Grades: ");
+            foreach (float grade in _grades)
+            {
+                textWriter.WriteLine(grade);
             }
         }
 
@@ -48,6 +58,10 @@ namespace Grades
             get { return _name; }
             set
             {
+                if (String.IsNullOrEmpty(value))
+                {
+                    throw new ArgumentException("Name cannot be null or empty");
+                }
                 if (_name != value)
                 {
                     var oldValue = _name;
@@ -64,8 +78,6 @@ namespace Grades
         }
 
         public event NameChangedDelegate NameChanged;
-
-
-        private List<float> grades;
+        private List<float> _grades;
     }
 }

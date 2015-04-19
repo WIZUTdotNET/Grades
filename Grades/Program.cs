@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
@@ -16,25 +17,50 @@ namespace Grades
         static void Main(string[] args)
         {
             GradeBook book = new GradeBook("Borys's Book");
-            book.AddGrade(89.5f);
-            book.AddGrade(91f);
-            book.AddGrade(75f);
+
+            try
+            {
+                using (FileStream stream = File.Open("grade.txt", FileMode.Open))
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    string line = reader.ReadLine();
+                    while (line != null)
+                    {
+                        float grade = float.Parse(line);
+                        book.AddGrade(grade);
+                        line = reader.ReadLine();
+                    }
+                }
+            }
+            catch (FileNotFoundException ex)
+            {
+                Console.WriteLine("Could not locate the file grades.txt");
+                return;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Console.WriteLine("No access");
+                return;
+            }
+
+            book.WriteGrades(Console.Out);
+
+            // dajcie zapętlenie do poprawnego wpisania nazwy dziennika. String.IsNullOrEmpty
+            try
+            {
+                Console.WriteLine("Please enter a name for the book");
+                book.Name = Console.ReadLine();
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine("Invalid Name");
+            }
 
             GradeStatistics stats = book.ComputeStatistics();
-
-            book.NameChanged += OnNameChanged;
-
-            book.Name = "Agata's book";
-
-            //WriteNames(book.Name);
-
             Console.WriteLine(stats.AverageGrade);
             Console.WriteLine(stats.HighestGrade);
             Console.WriteLine(stats.LowestGrade);
-
-            book.Name = "Cezary's book";
-            book.NameChanged -= OnNameChanged;
-            book.Name = "Dorota's book";
+            Console.WriteLine("{0} - {1}", stats.LetterGrade, stats.Description);
 
             Console.ReadLine();
         }
